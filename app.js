@@ -524,12 +524,11 @@ function initShipMasterForm() {
 window.addEventListener("load", () => {
   initNavigation();
   initRegionCards();
-  initMap();
   initShipMasterForm();
-  renderMasterList();
 
-  // 初回にマスタが空ならサンプル1〜2隻入れてもよい
-  if (loadShipMaster().length === 0) {
+  // まずマスタを用意してからリスト表示
+  let master = loadShipMaster();
+  if (master.length === 0) {
     const initial = [
       {
         id: 1,
@@ -553,12 +552,20 @@ window.addEventListener("load", () => {
       }
     ];
     saveShipMaster(initial);
-    renderMasterList();
+    master = initial;
+  }
+  renderMasterList();
+
+  // 地図の初期化は try/catch でガード
+  try {
+    initMap();
+  } catch (e) {
+    console.error("地図初期化エラー:", e);
   }
 
-  // AISデータ取得（ダミー）
+  // AISデータ取得（今はダミー）
   fetchAisData();
 
-  // しばらくの間、一定間隔で再取得（後で間隔調整）
+  // 定期更新（後で間隔は調整可）
   setInterval(fetchAisData, 5 * 60 * 1000); // 5分
 });
